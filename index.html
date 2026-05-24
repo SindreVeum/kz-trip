@@ -163,6 +163,67 @@ body {
   font-size:clamp(11px,1.2vw,13px);color:#b89060;font-style:italic;margin-top:1px;
 }
 
+/* HERO CAROUSEL */
+.hero-area {
+  position:relative;flex-shrink:0;height:clamp(130px,18vh,190px);
+  background:#0f0805;overflow:hidden;
+}
+
+.hero-img {
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;transition:opacity .4s ease;
+  opacity:0;
+}
+.hero-img.visible { opacity:1; }
+
+.hero-arrow {
+  position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(10,5,2,.55);border:1px solid rgba(107,79,42,.5);
+  color:#f5d78e;width:26px;height:26px;border-radius:4px;
+  cursor:pointer;font-size:13px;z-index:5;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.hero-arrow:hover{background:rgba(107,79,42,.7)}
+.hero-arrow.left{left:8px}
+.hero-arrow.right{right:8px}
+.hero-arrow.hidden{display:none}
+
+.hero-dots {
+  position:absolute;bottom:7px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;z-index:5;
+}
+.hero-dot {
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(255,255,255,.35);transition:all .2s;cursor:pointer;
+}
+.hero-dot.on{background:#f5d78e;transform:scale(1.3)}
+
+.hero-caption {
+  position:absolute;bottom:0;left:0;right:0;
+  padding:20px 10px 6px;
+  background:linear-gradient(to top,rgba(10,5,2,.75) 0%,transparent 100%);
+  font-family:'Cinzel',serif;font-size:clamp(8px,.9vw,9px);
+  color:#c8a96e;letter-spacing:1px;text-align:center;z-index:4;
+}
+
+/* VIBE TAGS */
+.vibe-row {
+  display:flex;flex-wrap:wrap;gap:4px;
+  padding:8px 16px 0;flex-shrink:0;
+}
+.vibe-tag {
+  background:rgba(107,79,42,.18);border:1px solid #3a2510;
+  border-radius:20px;padding:2px 9px;
+  font-family:'Cinzel',serif;font-size:clamp(7px,.85vw,9px);
+  color:#9b7a4a;letter-spacing:.5px;white-space:nowrap;
+}
+
+/* Activity description */
+.act-desc {
+  font-size:clamp(10px,1.1vw,11px);color:#6b4f2a;
+  font-style:italic;line-height:1.3;margin-top:2px;
+}
+
 /* Day tabs */
 .day-tabs {
   display:flex;border-bottom:1px solid #3a2510;flex-shrink:0;overflow-x:auto;
@@ -517,6 +578,7 @@ body {
 
   <!-- Side panel -->
   <div class="side-panel" id="sidePanel">
+   <div class="hero-area" id="heroArea"></div>
    <div class="panel-header">
     <button class="panel-close" onclick="closePanel()">✕</button>
     <div class="day-label-small" id="pDayLbl">DAY 1</div>
@@ -524,6 +586,7 @@ body {
     <div class="panel-city" id="pCity">—</div>
    </div>
    <div class="day-tabs" id="dayTabs"></div>
+   <div class="vibe-row" id="vibeRow"></div>
    <div class="panel-content" id="panelContent"></div>
    <div class="panel-footer">
     <button class="nav-btn" id="prevBtn" onclick="prevDay()">← PREV</button>
@@ -577,91 +640,110 @@ body {
 const ITINERARY = {
  A: { label:'3 Nights', days:[
   { id:'a1', city:'almaty', lbl:'DAY 1', title:'The Journey Begins', sub:'Almaty → Bishkek',
+    imgs:['./images/07_almaty_city.jpg','./images/08_bishkek_ala_too.jpg'],
+    vibe:['Alpine megacity','Soviet-green capital','5–7h overland'],
     transport:{ emoji:'🚌', type:'BUS', route:'Almaty → Bishkek', from:'Sayran Bus Station, Almaty', dur:'5–7 hours', times:['12:00 (preferred)','14:00 (backup)'] },
     acts:[
      {id:'1',e:'✈️',t:'Land in Almaty'},
      {id:'2',e:'📱',t:'Get SIM / eSIM + cash'},
      {id:'3',e:'🚕',t:'Taxi to Sayran Bus Station'},
-     {id:'4',e:'🏛️',t:'Ala-Too Square'},
-     {id:'5',e:'🌳',t:'Panfilov Park'},
-     {id:'6',e:'🛒',t:'Osh Bazaar'},
-     {id:'7',e:'🍽️',t:'Dinner at Navat'},
+     {id:'4',e:'🏛️',t:'Ala-Too Square',d:'Bishkek\'s main square — Soviet monuments meet Kyrgyz pride.'},
+     {id:'5',e:'🌳',t:'Panfilov Park',d:'Leafy Soviet-era park with the stunning Zenkov Cathedral nearby.'},
+     {id:'6',e:'🛒',t:'Osh Bazaar',d:'Bishkek\'s liveliest market. Dried fruits, spices, bread & chaos.'},
+     {id:'7',e:'🍽️',t:'Dinner at Navat',d:'One of Bishkek\'s best spots for traditional Kyrgyz cuisine.'},
     ]},
   { id:'a2', city:'bishkek', lbl:'DAY 2', title:'Mountains & Night Bus', sub:'Bishkek → Overnight',
+    imgs:['./images/03_ala_archa_national_park.jpg'],
+    vibe:['Glacier rivers','Pine forests','Granite peaks','Wilderness in 1h'],
     transport:{ emoji:'🌙', type:'NIGHT BUS', route:'Bishkek → Tashkent', from:'Bishkeksky Avtovokzal', dur:'12–13 hours', times:['Evening departure'] },
     acts:[
-     {id:'1',e:'🏔️',t:'Ala-Archa National Park'},
-     {id:'2',e:'🌊',t:'Snow-capped peaks & river valleys'},
-     {id:'3',e:'🥾',t:'Easy scenic hike'},
+     {id:'1',e:'🏔️',t:'Ala-Archa National Park',d:'From Soviet city to alpine wilderness in under an hour. Best short hike: Ak-Sai waterfall trail.'},
+     {id:'2',e:'🌊',t:'Snow-capped peaks & river valleys',d:'Glacier rivers, wildflower meadows & snowfields. Feels like a fantasy RPG world.'},
+     {id:'3',e:'🥾',t:'Easy scenic hike',d:'No technical gear needed — beautiful even on the gentle trails.'},
      {id:'4',e:'☕',t:'Return to city — relax, eat, pack'},
-     {id:'5',e:'🌙',t:'Board overnight bus to Tashkent'},
+     {id:'5',e:'🌙',t:'Board overnight bus to Tashkent',d:'Sleep through the border crossing. Wake up in Uzbekistan.'},
     ]},
   { id:'a3', city:'tashkent', lbl:'DAY 3', title:'Tashkent & Sleeper Train', sub:'Tashkent → Train',
+    imgs:['./images/06_chorsu_bazaar_tashkent.jpg','./images/10_sleeper_train.jpg'],
+    vibe:['Silk Road megacity','Ancient domes','Retro sleeper train'],
     transport:{ emoji:'🚂', type:'SLEEPER TRAIN', route:'Tashkent → Almaty', from:'Tashkent Central Railway Station', dur:'17–18 hours', times:['Departs ~12:39','Arrives ~06:47 next day'] },
     acts:[
      {id:'1',e:'🌅',t:'Arrive Tashkent in the morning'},
-     {id:'2',e:'🧅',t:'Chorsu Bazaar'},
-     {id:'3',e:'🕌',t:'Hazrati Imam Complex'},
-     {id:'4',e:'🚇',t:'Tashkent Metro (world-famous stations!)'},
-     {id:'5',e:'🏛️',t:'Amir Timur Square'},
-     {id:'6',e:'🚂',t:'Board sleeper train to Almaty'},
+     {id:'2',e:'🧅',t:'Chorsu Bazaar',d:'Heart of the Silk Road — centuries-old market under the iconic blue dome. Spices, bread & color.'},
+     {id:'3',e:'🕌',t:'Hazrati Imam Complex',d:'Ancient mosque complex housing one of the world\'s oldest Quran manuscripts.'},
+     {id:'4',e:'🚇',t:'Tashkent Metro',d:'Some of the most ornately decorated metro stations on earth — Soviet-era art at its peak.'},
+     {id:'5',e:'🏛️',t:'Amir Timur Square',d:'Grand central square dedicated to Timur (Tamerlane), the great conqueror of Central Asia.'},
+     {id:'6',e:'🚂',t:'Board sleeper train to Almaty',d:'17–18 hours across the steppe under the stars. A proper adventure.'},
     ], food:['Plov','Lagman','Samsa','Shashlik']},
   { id:'a4', city:'almaty', lbl:'DAY 4', title:'Almaty Arrival', sub:'Almaty',
+    imgs:['./images/09_medeu_shymbulak.jpg','./images/01_big_almaty_lake.jpg'],
+    vibe:['Urban alpine','Cable car views','Turquoise lakes','~1h from centre'],
     transport:{ emoji:'🚉', type:'ARRIVAL', route:'Almaty-2 Railway Station', from:'Abylai Khan Ave 1, Almaty', dur:'Early morning', times:['~06:47 arrival'] },
     acts:[
-     {id:'1',e:'🛒',t:'Green Bazaar'},
-     {id:'2',e:'⛰️',t:'Kok-Tobe (cable car!)'},
-     {id:'3',e:'⛪',t:'Zenkov Cathedral'},
-     {id:'4',e:'⛷️',t:'Medeu / Shymbulak'},
+     {id:'1',e:'🛒',t:'Green Bazaar',d:'Almaty\'s most atmospheric covered market. Fresh produce, meat & local products.'},
+     {id:'2',e:'⛰️',t:'Kok-Tobe',d:'Cable car up to a hilltop park with panoramic views over the entire city and mountains beyond.'},
+     {id:'3',e:'⛪',t:'Zenkov Cathedral',d:'One of the most beautiful wooden churches in Central Asia, built without a single nail.'},
+     {id:'4',e:'⛷️',t:'Medeu / Shymbulak',d:'World\'s highest skating rink at Medeu, or take the gondola up to Shymbulak ski resort for views.'},
     ]},
  ]},
  B: { label:'4 Nights', days:[
   { id:'b1', city:'almaty', lbl:'DAY 1', title:'The Journey Begins', sub:'Almaty → Bishkek',
+    imgs:['./images/07_almaty_city.jpg','./images/08_bishkek_ala_too.jpg'],
+    vibe:['Alpine megacity','Soviet-green capital','5–7h overland'],
     transport:{ emoji:'🚌', type:'BUS', route:'Almaty → Bishkek', from:'Sayran Bus Station, Almaty', dur:'5–7 hours', times:['12:00 (preferred)','14:00 (backup)'] },
     acts:[
      {id:'1',e:'✈️',t:'Land in Almaty'},
      {id:'2',e:'📱',t:'Get SIM / eSIM + cash'},
      {id:'3',e:'🚕',t:'Taxi to Sayran Bus Station'},
-     {id:'4',e:'🏛️',t:'Ala-Too Square'},
-     {id:'5',e:'🌳',t:'Panfilov Park'},
-     {id:'6',e:'🛒',t:'Osh Bazaar'},
-     {id:'7',e:'🍽️',t:'Dinner at Navat'},
+     {id:'4',e:'🏛️',t:'Ala-Too Square',d:'Bishkek\'s main square — Soviet monuments meet Kyrgyz pride.'},
+     {id:'5',e:'🌳',t:'Panfilov Park',d:'Leafy Soviet-era park with the stunning Zenkov Cathedral nearby.'},
+     {id:'6',e:'🛒',t:'Osh Bazaar',d:'Bishkek\'s liveliest market. Dried fruits, spices, bread & chaos.'},
+     {id:'7',e:'🍽️',t:'Dinner at Navat',d:'One of Bishkek\'s best spots for traditional Kyrgyz cuisine.'},
     ]},
   { id:'b2', city:'bishkek', lbl:'DAY 2', title:'Mountains & Night Bus', sub:'Bishkek → Overnight',
+    imgs:['./images/03_ala_archa_national_park.jpg'],
+    vibe:['Glacier rivers','Pine forests','Granite peaks','Wilderness in 1h'],
     transport:{ emoji:'🌙', type:'NIGHT BUS', route:'Bishkek → Tashkent', from:'Bishkeksky Avtovokzal', dur:'12–13 hours', times:['Evening departure'] },
     acts:[
-     {id:'1',e:'🏔️',t:'Ala-Archa National Park'},
-     {id:'2',e:'🌊',t:'Snow-capped peaks & river valleys'},
-     {id:'3',e:'🥾',t:'Easy scenic hike'},
+     {id:'1',e:'🏔️',t:'Ala-Archa National Park',d:'From Soviet city to alpine wilderness in under an hour. Best short hike: Ak-Sai waterfall trail.'},
+     {id:'2',e:'🌊',t:'Snow-capped peaks & river valleys',d:'Glacier rivers, wildflower meadows & snowfields. Feels like a fantasy RPG world.'},
+     {id:'3',e:'🥾',t:'Easy scenic hike',d:'No technical gear needed — beautiful even on the gentle trails.'},
      {id:'4',e:'☕',t:'Cafés & Osh Bazaar in the afternoon'},
-     {id:'5',e:'🌙',t:'Board overnight bus to Tashkent'},
+     {id:'5',e:'🌙',t:'Board overnight bus to Tashkent',d:'Sleep through the border crossing. Wake up in Uzbekistan.'},
     ]},
   { id:'b3', city:'tashkent', lbl:'DAY 3', title:'Full Day in Tashkent', sub:'Tashkent',
+    imgs:['./images/06_chorsu_bazaar_tashkent.jpg','./images/05_charvak_reservoir.jpg'],
+    vibe:['Silk Road megacity','Spices & domes','Overnight stay'],
     transport:null,
     acts:[
      {id:'1',e:'🌅',t:'Arrive & check into hotel'},
-     {id:'2',e:'🧅',t:'Chorsu Bazaar'},
-     {id:'3',e:'🕌',t:'Hazrati Imam Complex'},
-     {id:'4',e:'🚇',t:'Tashkent Metro'},
-     {id:'5',e:'🏛️',t:'Amir Timur Square'},
-     {id:'6',e:'🎭',t:'Broadway Area (evening stroll)'},
+     {id:'2',e:'🧅',t:'Chorsu Bazaar',d:'Heart of the Silk Road — centuries-old market under the iconic blue dome. Spices, bread & color.'},
+     {id:'3',e:'🕌',t:'Hazrati Imam Complex',d:'Ancient mosque complex housing one of the world\'s oldest Quran manuscripts.'},
+     {id:'4',e:'🚇',t:'Tashkent Metro',d:'Some of the most ornately decorated metro stations on earth — Soviet-era art at its peak.'},
+     {id:'5',e:'🏛️',t:'Amir Timur Square',d:'Grand central square dedicated to Timur (Tamerlane), the great conqueror of Central Asia.'},
+     {id:'6',e:'🎭',t:'Broadway Area (evening stroll)',d:'Tashkent\'s lively pedestrian street — art, food stalls & the city at its most relaxed.'},
     ], food:['Plov','Lagman','Samsa','Shashlik']},
   { id:'b4', city:'tashkent', lbl:'DAY 4', title:'Slow Morning + Train', sub:'Tashkent → Sleeper Train',
+    imgs:['./images/10_sleeper_train.jpg','./images/05_charvak_reservoir.jpg'],
+    vibe:['Slow morning','Silk Road last look','17h under the stars'],
     transport:{ emoji:'🚂', type:'SLEEPER TRAIN', route:'Tashkent → Almaty', from:'Tashkent Central Railway Station', dur:'17–18 hours', times:['Departs ~12:39','Arrives ~06:47 next day'] },
     acts:[
-     {id:'1',e:'🎨',t:'Museum of Applied Arts'},
-     {id:'2',e:'🕌',t:'Minor Mosque'},
-     {id:'3',e:'🚇',t:'Extra metro stops'},
-     {id:'4',e:'🍜',t:'Long lunch / café hopping'},
-     {id:'5',e:'🚂',t:'Board sleeper train to Almaty'},
+     {id:'1',e:'🎨',t:'Museum of Applied Arts',d:'Stunning traditional Uzbek architecture housing decorative arts & ceramics collections.'},
+     {id:'2',e:'🕌',t:'Minor Mosque',d:'A beautiful neighbourhood mosque — less touristy, more authentic than the big sites.'},
+     {id:'3',e:'🚇',t:'Extra metro stops',d:'Each station is a different era of Soviet design. Worth riding end to end.'},
+     {id:'4',e:'🍜',t:'Long lunch / café hopping',d:'Tashkent has an excellent café scene. Take your time before the long train ride.'},
+     {id:'5',e:'🚂',t:'Board sleeper train to Almaty',d:'17–18 hours across the steppe under the stars. A proper adventure.'},
     ]},
   { id:'b5', city:'almaty', lbl:'DAY 5', title:'Almaty Arrival', sub:'Almaty',
+    imgs:['./images/09_medeu_shymbulak.jpg','./images/01_big_almaty_lake.jpg','./images/02_charyn_canyon.jpg'],
+    vibe:['Urban alpine','Cable car views','Turquoise lakes','~1h from centre'],
     transport:{ emoji:'🚉', type:'ARRIVAL', route:'Almaty-2 Railway Station', from:'Abylai Khan Ave 1, Almaty', dur:'Early morning', times:['~06:47 arrival'] },
     acts:[
-     {id:'1',e:'⛰️',t:'Kok-Tobe (cable car!)'},
-     {id:'2',e:'🛒',t:'Green Bazaar'},
-     {id:'3',e:'🌳',t:'Panfilov Park'},
-     {id:'4',e:'🚡',t:'Cable car rides'},
+     {id:'1',e:'⛰️',t:'Kok-Tobe',d:'Cable car up to a hilltop park with panoramic views over the entire city and mountains beyond.'},
+     {id:'2',e:'🛒',t:'Green Bazaar',d:'Almaty\'s most atmospheric covered market. Fresh produce, meat & local products.'},
+     {id:'3',e:'🌳',t:'Panfilov Park',d:'Leafy park in the city centre with the beautiful wooden Zenkov Cathedral.'},
+     {id:'4',e:'🚡',t:'Cable car rides',d:'Multiple cable car options in and around Almaty — city views and mountain access.'},
+     {id:'5',e:'💙',t:'Big Almaty Lake (optional +1h)',d:'One of the most insane views near the route. Bright turquoise water surrounded by snow-capped peaks.'},
     ]},
  ]},
 };
@@ -723,6 +805,57 @@ function syncCity() {
  document.getElementById('marker-' + c).classList.add('active');
 }
 
+// ── HERO CAROUSEL ─────────────────────────────────────────────
+let heroIdx = 0;
+
+function renderHero(d) {
+ heroIdx = 0;
+ const imgs = d.imgs || [];
+ const area = document.getElementById('heroArea');
+ if (!imgs.length) { area.style.display='none'; return; }
+ area.style.display = 'block';
+
+ const captions = imgs.map(src => {
+  const name = src.split('/').pop().replace(/^\d+_/,'').replace(/_/g,' ').replace('.jpg','');
+  return name.replace(/\b\w/g, c=>c.toUpperCase());
+ });
+
+ area.innerHTML = imgs.map((src,i) =>
+  `<img class="hero-img${i===0?' visible':''}" src="${src}" alt="${captions[i]}">`
+ ).join('') +
+ (imgs.length > 1 ? `
+  <button class="hero-arrow left hidden" id="hPrev" onclick="shiftHero(-1)">‹</button>
+  <button class="hero-arrow right" id="hNext" onclick="shiftHero(1)">›</button>
+  <div class="hero-dots">${imgs.map((_,i)=>`<div class="hero-dot${i===0?' on':''}" onclick="goHero(${i})"></div>`).join('')}</div>
+ ` : '') +
+ `<div class="hero-caption" id="heroCap">${captions[0]}</div>`;
+}
+
+function shiftHero(dir) {
+ const area = document.getElementById('heroArea');
+ const imgs = area.querySelectorAll('.hero-img');
+ goHero(heroIdx + dir);
+}
+
+function goHero(idx) {
+ const area = document.getElementById('heroArea');
+ const imgs = area.querySelectorAll('.hero-img');
+ const dots = area.querySelectorAll('.hero-dot');
+ const cap  = document.getElementById('heroCap');
+ const prev = document.getElementById('hPrev');
+ const next = document.getElementById('hNext');
+ if (!imgs.length) return;
+ heroIdx = Math.max(0, Math.min(idx, imgs.length - 1));
+ imgs.forEach((img,i) => img.classList.toggle('visible', i===heroIdx));
+ dots.forEach((d,i) => d.classList.toggle('on', i===heroIdx));
+ if (cap) {
+  const name = imgs[heroIdx].src.split('/').pop().replace(/^\d+_/,'').replace(/_/g,' ').replace('.jpg','');
+  cap.textContent = name.replace(/\b\w/g, c=>c.toUpperCase());
+ }
+ if (prev) prev.classList.toggle('hidden', heroIdx===0);
+ if (next) next.classList.toggle('hidden', heroIdx===imgs.length-1);
+}
+
 // ── RENDER PANEL ──────────────────────────────────────────────
 function renderPanel() {
  const days = ITINERARY[ver].days;
@@ -736,6 +869,19 @@ function renderPanel() {
  document.getElementById('dayTabs').innerHTML = days.map((day,i) =>
   `<button class="day-tab${i===dayIdx?' active':''}" onclick="goToDay(${i})">${day.lbl}</button>`
  ).join('');
+
+ // Hero carousel (injected directly into panel before content)
+ renderHero(d);
+
+ // Vibe tags (injected into .vibe-row)
+ const vibeRow = document.getElementById('vibeRow');
+ if (d.vibe && d.vibe.length) {
+  vibeRow.innerHTML = d.vibe.map(v=>`<span class="vibe-tag">${v}</span>`).join('');
+  vibeRow.style.display = 'flex';
+ } else {
+  vibeRow.innerHTML = '';
+  vibeRow.style.display = 'none';
+ }
 
  // Content
  let h = '';
@@ -760,7 +906,10 @@ function renderPanel() {
   const saved = rxns[key];
   h += `<li class="act-item">
    <span class="act-emoji">${a.e}</span>
-   <span class="act-text">${a.t}</span>
+   <div style="flex:1;min-width:0">
+    <div class="act-text">${a.t}</div>
+    ${a.d ? `<div class="act-desc">${a.d}</div>` : ''}
+   </div>
    <div class="reactions">
     ${['❤️','👍','🤔','✗'].map(r=>
      `<button class="rxn${saved===r?' on':''}" onclick="setRxn('${key}','${r}',this)">${r}</button>`
